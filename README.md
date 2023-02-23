@@ -1,87 +1,69 @@
-[![Cesium for Unreal Logo](Content/Cesium-for-Unreal-Logo-WhiteBGH.jpg)](https://cesium.com/unreal-marketplace?utm_source=cesium-unreal&utm_medium=github&utm_campaign=unreal)
+# 令和4年度 民間ユースケース開発　UC22-030「防災エリアマネジメントDX」の成果物
 
-_This branch targets Unreal Engine 4. There is also a branch targeting [Unreal Engine 5](../../tree/ue5-main)_
 
-Cesium for Unreal brings the 3D geospatial ecosystem to Unreal Engine. By combining a high-accuracy full-scale WGS84 globe, open APIs and open standards for spatial indexing such as 3D Tiles, and cloud-based real-world content from [Cesium ion](https://cesium.com/cesium-ion) with Unreal Engine, this project enables a new era of 3D geospatial software.
+## 概要
+PLATEAUの3D都市モデルを利⽤した⼈流シミュレーションをするために必要なCesium for Unreal の改修の内容です。
 
-[Cesium for Unreal Homepage](https://cesium.com/cesium-for-unreal?utm_source=github&utm_medium=github&utm_campaign=unreal)
+Cesium for UnrealはUnreal Engineに3Dモデルを取り込むためのプラグインで、概要は[Cesium for UnrealのREADME](https://github.com/CesiumGS/cesium-unreal)をご参照ください。
 
-### :rocket: Get Started
+## 「防災エリアマネジメントDX」について
+令和4年度の3D都市モデルを活用した⺠間サービス創出型ユースケース開発業務「防災を切り⼝にしたエリアマネジメントDX」において、エリア防災計画の更新やステークホルダとの合意形成における有効性検証を⽬的に、⾼輪ゲートウェイエリアの3D都市モデルを利⽤し、1万⼈規模の⼈流シミュレーション環境（誘導・避難シミュレーション）を構築しました。
 
-**[Download Cesium for Unreal from Unreal Engine Marketplace](https://cesium.com/unreal-marketplace?utm_source=cesium-unreal&utm_medium=github&utm_campaign=unreal)**
+⼤規模な⼈流シミュレーション環境を構築する上で、Cesium for Unrealには以下の課題がありました。
 
-**[Follow the Quickstart](https://cesium.com/docs/tutorials/cesium-unreal-quickstart/)**
+ - Characterの移動可能領域が⽣成されず、移動シミュレーションを実施することができない
+ - BoundingBoxのサイズが最適ではなく、1万⼈規模の移動シミュレーションを実施する場合に性能が出ない
 
-Have questions? Ask them on the [community forum](https://community.cesium.com).
 
-### :clap: Featured Demos
+## 改修内容
+### 移動可能領域の生成
+Cesium for UnrealではUnreal Engineに取り込んだ3D都市モデルに対して、NavMeshが⽣成できず(図1)、キャラクターがスタート地点からゴール地点までの移動経路をが探索できず、結果としてキャラクターの移動シミュレーションが実施できないという課題がありました。
 
-<p>
-<a href="https://github.com/CesiumGS/cesium-unreal-samples"><img src="https://images.prismic.io/cesium/bfa9f768-26eb-4a6f-a427-8e9cecbe16b1_melbourne.jpg" width="48%" /></a>&nbsp;
-<a href="https://cesium.com/blog/2020/11/30/project-anywhere/"><img src="https://images.prismic.io/cesium/2020-11-30-Project-Anywhere-3.jpg" width="48%" /></a>&nbsp;
-<br/>
-<br/>
-</p>
+図1：改修前のNavMesh計算後の様子
+![NavMesh変更前](images/NavMesh_BeforeMod.png "NavMesh変更前")
 
-### :house_with_garden: Cesium for Unreal and the 3D Geospatial Ecosystem
+上記の課題を解決するために、Cesium for Unrealのモデル読み込み時にNavMeshの計算を実⾏する改修を⾏いました。
+この改修により、Cesium for Unrealで取り込んだ3D都市モデルに対してもNavMeshが⽣成ができ（図2）、シミュレーション実⾏時に移動経路探索が可能となりました。
 
-Cesium for Unreal streams real-world 3D content such as high-resolution photogrammetry, terrain, imagery, and 3D buildings from [Cesium ion](https://cesium.com/cesium-ion) and other sources, available as optional commercial subscriptions. The plugin includes Cesium ion integration for instant access to global high-resolution 3D content ready for runtime streaming. Cesium ion users can also leverage cloud-based 3D tiling pipelines to create end-to-end workflows to transform massive heterogenous content into semantically-rich 3D Tiles, ready for streaming to Unreal Engine.
+図2：改修後のNavMesh計算後の様子
+![NavMesh変更後](images/NavMesh_AfterMod.png "NavMesh変更後")
 
-Cesium for Unreal supports cloud and private network content and services based on open standards and APIs. You are free to use any combination of supported content sources, standards, APIs with Cesium for Unreal.
+### BoundingBoxの最適化
+Cesium for Unrealは3D Tilesのb3dm内に記載された情報からBoundingBoxのサイズを決定していますが、1つのb3dm内に複数のComponentの情報が存在する場合、全てのComponentに対して同じサイズでBoundingBoxが設定されており、実際のサイズよりも⼤きなサイズのBoundingBoxが⽣成されていました。
+例として、今回のユースケースの対象となる⾼輪ゲートウェイの3Dモデルは1つのb3dmとそのb3dm内に10個のComponentが存在していますが、10個全てに⼤きなサイズのBoundingBox が⽣成されていました（図3)。
+BoundingBoxはシミュレーション時の各アクター間の衝突計算を実⾏するための範囲を決めるものでもあり、サイズが⼤きくなると、BoundingBoxの重なりが多く発⽣し、計算実⾏回数が増加する等でシミュレーション負荷が上がるという課題がありました。
 
-[![Cesium for Unreal Ecosystem Architecture](https://prismic-io.s3.amazonaws.com/cesium/b1505fbc-5769-4032-9233-364a4f52acf6_unreal-pipeline-ice-blue-background.png)](https://cesium.com/cesium-for-unreal?utm_source=cesium-unreal&utm_medium=github&utm_campaign=unreal)
 
-Using Cesium ion helps support Cesium for Unreal development. :heart:
+図3-a: 改修前の高輪GWモデルでのBoundingBox(モデル全体)
+![BounidingBox改修前全体](images/BounidingBox_BeforeMod_Whole.png "BounidingBox改修前全体")
 
-### :chains: Unreal Engine Integration
+図3-b: 改修前の高輪GWモデルでのBoundingBox(Component単位)
+![BounidingBox改修前_コンポーネント1](images/BounidingBox_BeforeMod_Component1.png "BounidingBox改修前_コンポーネント1")
+![BounidingBox改修前_コンポーネント2](images/BounidingBox_BeforeMod_Component2.png "BounidingBox改修前_コンポーネント2")
 
-Cesium for Unreal is tightly integrated with Unreal Engine making it possible to visualize and interact with real-world content in editor and at runtime. The plugin also has support for Unreal Engine physics, collisions, character interaction, and landscaping tools. Leverage decades worth of cutting-edge advancements in Unreal Engine and geospatial to create cohesive, interactive, and realistic simulations and applications with Cesium for Unreal.
+上記の課題を解決するために、BoundingBoxをComponentのサイズに合わせて⽣成するようにCesium for Unrealの改修を⾏いました。
+具体的には、Cesium for Unrealで各Componentに対するBoundingBoxのサイズを計算する際にb3dmファイル内に記載された全てのComponentのポリゴン間の距離を対象に計算を⾏っている箇所を、各Componentのポリゴン間の距離だけを対象に計算するように修正しました(図4) 。
 
-### :green_book: License
 
-[Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html). Cesium for Unreal is free for both commercial and non-commercial use.
+図4: BoundingBox最適化の改修内容の概念図
+![BoundingBox改修内容概念図](images/BoundingBox_ConceptualDiagram.png "BoundingBox改修内容概念図")
 
-### :package: Accessing Packaged Plugin
+上記の改修をすることで、各Componenに適切なサイズのBoundingBoxを⽣成することができ（図5）、シミュレーション時における衝突判定の計算負荷を下げることができました。
 
-The easiest way to access Cesium for Unreal is by downloading officially released versions from the [Unreal Engine Marketplace](https://cesium.com/unreal-marketplace?utm_source=cesium-unreal&utm_medium=github&utm_campaign=unreal).
+図5: 改修後のGWモデルでのBoundingBox
+![BoundingBox改修後](images/BoundingBox_AfterMod.png "BoundingBox改修後")
 
-If you would like to access pre-release, development versions of the plugin, Cesium for Unreal has Travis CI integration that prepares packages with each CI build. To access these packages, click the ✔️ icon on the GitHub branch or commit and click the `Details` next to `plugin-package-combined`. You can extract the downloaded plugin package into your Unreal project's `Plugins` directory.
+## ライセンス <!-- 定型文のため変更しない -->
+* ソースコードおよび関連ドキュメントの著作権は国土交通省に帰属します。
+* 本ドキュメントは[Project PLATEAUのサイトポリシー](https://www.mlit.go.jp/plateau/sitepolicy/)（CCBY4.0および政府標準利用規約2.0）に従い提供されています。
 
-### :computer: Developing with Unreal Engine
+## 注意事項 <!-- 定型文のため変更しない -->
 
-See the [Developer Setup Guide](Documentation/developer-setup.md) to learn how to set up a development environment for Cesium for Unreal, allowing you to compile it, customize it, and contribute to its development.
+* 本レポジトリは参考資料として提供しているものです。動作保証は行っておりません。
+* 予告なく変更・削除する可能性があります。
+* 本レポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
 
-<!-- #### :hammer_and_wrench: Compiling Cesium for Unreal
-
-The following steps detail how to build the plugin and use it as part of your projects. You can also compile Cesium for Unreal as part of the [`cesium-unreal-samples`](https://github.com/CesiumGS/cesium-unreal-samples.git).
-
-Cesium for Unreal depends on Cesium's high-precision geospatial C++ library - [Cesium Native](https://github.com/CesiumGS/cesium-native), which is included as a submodule.
-
-1. Clone the repository using `git clone --recursive git@github.com:CesiumGS/cesium-unreal.git`.
-2. From the `cesium-unreal/extern` directory, run the following commands to build `cesium-native`.
-
-    * CMake configuration and build on Windows platform:
-
-    ```cmd
-    cmake -B build -S . -G "Visual Studio 15 2017 Win64" # Optionally use "Visual Studio 16 2019"
-    cmake --build build --config Release --target install # Can optionally compile with --config RelWithDebInfo or MinSizeRel.
-    cmake --build build --config Debug --target install # Optional, recommended for debugging
-    ```
-
-    * CMake configuration and build on Linux platform:
-    
-    ```cmd
-    export UNREAL_ENGINE_DIR=<path_to_unreal_engine>
-    export UNREAL_ENGINE_COMPILER_DIR=$UNREAL_ENGINE_DIR/Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/Linux_x64/v17_clang-10.0.1-centos7/x86_64-unknown-linux-gnu
-    export UNREAL_ENGINE_LIBCXX_DIR=$UNREAL_ENGINE_DIR/Engine/Source/ThirdParty/Linux/LibCxx
-
-    # Release build
-    cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE="unreal-linux-toolchain.cmake" -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Release
-    cmake --build build --target install
-
-    # Debug build
-    cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE="unreal-linux-toolchain.cmake" -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Debug
-    cmake --build build --target install
-    ```
-
-3. Point your Unreal Engine Project to the `CesiumForUnreal.uplugin` file to load the plugin into Unreal Engine. -->
+## 参考資料　 <!-- 各リンクは納品時に更新 -->
+* （ユースケース名）技術検証レポート: https://www.mlit.go.jp/plateau/libraries/technical-reports/
+* PLATEAU Webサイト Use caseページ「防災エリアマネジメントDX」: https://www.mlit.go.jp/plateau/use-case/uc22-030/
+* Cesium for Unreal：https://github.com/CesiumGS/cesium-unreal
