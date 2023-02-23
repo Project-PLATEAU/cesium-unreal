@@ -1,4 +1,5 @@
-# 令和4年度 民間ユースケース開発　UC22-030「防災エリアマネジメントDX」の成果物
+# FY2022 Project PLATEAU UC22-030「防災エリアマネジメントDX」の成果物
+### 大規模人流シミュレーション用 UE4 Cesium for Unreal改修リポジトリ
 
 
 ## 概要
@@ -7,7 +8,7 @@ PLATEAUの3D都市モデルを利⽤した⼈流シミュレーションをす�
 Cesium for UnrealはUnreal Engineに3Dモデルを取り込むためのプラグインで、概要は[Cesium for UnrealのREADME](https://github.com/CesiumGS/cesium-unreal)をご参照ください。
 
 ## 「防災エリアマネジメントDX」について
-令和4年度の3D都市モデルを活用した⺠間サービス創出型ユースケース開発業務「防災を切り⼝にしたエリアマネジメントDX」において、エリア防災計画の更新やステークホルダとの合意形成における有効性検証を⽬的に、⾼輪ゲートウェイエリアの3D都市モデルを利⽤し、1万⼈規模の⼈流シミュレーション環境（誘導・避難シミュレーション）を構築しました。
+令和4年度の3D都市モデルを活用した⺠間サービス創出型ユースケース開発業務「防災エリアマネジメントDX」において、エリア防災計画の更新やステークホルダとの合意形成における有効性検証を⽬的に、⾼輪ゲートウェイエリアの3D都市モデルを利⽤し、1万⼈規模の⼈流シミュレーション環境（誘導・避難シミュレーション）を構築しました。
 
 ⼤規模な⼈流シミュレーション環境を構築する上で、Cesium for Unrealには以下の課題がありました。
 
@@ -64,6 +65,6 @@ BoundingBoxはシミュレーション時の各アクター間の衝突計算を
 * 本レポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
 
 ## 参考資料　 <!-- 各リンクは納品時に更新 -->
-* （ユースケース名）技術検証レポート: https://www.mlit.go.jp/plateau/libraries/technical-reports/
+* （近日公開）技術検証レポート: https://www.mlit.go.jp/plateau/libraries/technical-reports/
 * PLATEAU Webサイト Use caseページ「防災エリアマネジメントDX」: https://www.mlit.go.jp/plateau/use-case/uc22-030/
 * Cesium for Unreal：https://github.com/CesiumGS/cesium-unreal
