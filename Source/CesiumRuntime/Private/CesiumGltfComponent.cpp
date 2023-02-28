@@ -2099,6 +2099,8 @@ static void loadPrimitiveGameThreadPart(
   pStaticMesh->GetRenderData()->ScreenSize[0].Default = 1.0f;
 #endif
   pStaticMesh->CreateBodySetup();
+  
+  pStaticMesh->CreateNavCollision(true);
 
   UBodySetup* pBodySetup = pMesh->GetBodySetup();
 
